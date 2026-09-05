@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from typing import List, Sequence, Tuple
 
 # Импортируем базовую функцию и тип вектора из нашего второго модуля
-from black_box import BaseFunction, Vector
 
-from constructive_number import ConstructiveNumber
+from .black_box import BaseFunction, Vector
+from .constructive_number import ConstructiveNumber
 
 
 def to_real_value(value: float | ConstructiveNumber) -> float:

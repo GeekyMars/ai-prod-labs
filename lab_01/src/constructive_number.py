@@ -136,6 +136,9 @@ class ConstructiveNumber:
         """ Возвращает центр интервала """
         return self.get_real(0.5)
 
+    def get_radius(self) -> float:
+        """Возвращает радиус интервала."""
+        return (self.b - self.a) / 2.0
 
     def __lt__(self, other: Union['ConstructiveNumber', float, int]) -> bool:
         """ Оператор < (less than). Сравниваем по центрам интервалов """
