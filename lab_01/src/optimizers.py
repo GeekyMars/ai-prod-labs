@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Sequence, Tuple
+from typing import List, Sequence
 
 # Импортируем базовую функцию и тип вектора из нашего второго модуля
 
@@ -21,6 +21,7 @@ class BaseOptimizer(ABC):
     Абстрактный базовый класс для алгоритмов оптимизации
     Обеспечивает единый интерфейс и встроенную систему запоминания траектории
     """
+
     def __init__(self):
         # Хранилище истории для построения графиков
         self.history_x: List[Vector] = []
@@ -40,7 +41,7 @@ class BaseOptimizer(ABC):
         Сохраняет текущую точку, значение функции и радиус погрешности.
         """
         self.history_x.append([xi for xi in x])
-        
+
         if isinstance(f_val, ConstructiveNumber):
             self.history_f.append(f_val.get_center())
             self.history_radius.append(f_val.get_radius())
@@ -48,9 +49,14 @@ class BaseOptimizer(ABC):
             self.history_f.append(float(f_val))
             self.history_radius.append(0.0)
 
-
     @abstractmethod
-    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], *args, **kwargs) -> Vector:
+    def optimize(
+        self,
+        func: BaseFunction,
+        x0: Sequence[float | ConstructiveNumber],
+        *args,
+        **kwargs,
+    ) -> Vector:
         """
         Основной метод оптимизации.
         :param func: Целевая функция, наследник BaseFunction
@@ -64,7 +70,15 @@ class GradientDescentOptimizer(BaseOptimizer):
     """
     Классический градиентный спуск
     """
-    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], learning_rate: float = 0.01, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
+
+    def optimize(
+        self,
+        func: BaseFunction,
+        x0: Sequence[float | ConstructiveNumber],
+        learning_rate: float = 0.01,
+        max_iter: int = 1000,
+        tol: float = 1e-6,
+    ) -> Vector:
         """
         Запуск оптимизации.
         func: Целевая функция
@@ -74,7 +88,7 @@ class GradientDescentOptimizer(BaseOptimizer):
         tol: Толерантность - критерий остановки по норме градиента
         """
         self.clear_history()
-        
+
         # Делаем копию стартового вектора, чтобы не перезаписать оригинал в памяти
         x = [xi for xi in x0]
 
@@ -88,13 +102,18 @@ class GradientDescentOptimizer(BaseOptimizer):
 
             # Критерий остановки: проверяем, не достигли ли мы минимума
             # Для проверки длины вектора градиента используем только скалярные центры чисел
-            grad_real = [g.get_center() if isinstance(g, ConstructiveNumber) else float(g) for g in grad]
-                   
+            grad_real = [
+                g.get_center() if isinstance(g, ConstructiveNumber) else float(g)
+                for g in grad
+            ]
+
             grad_norm = sum(g * g for g in grad_real) ** 0.5
-            
+
             # Если градиент близок к нулю, значит мы в точке минимума
             if grad_norm < tol:
-                print(f"Градиентный спуск успешно сошелся за {i} итераций (norm: {grad_norm:.6f})")
+                print(
+                    f"Градиентный спуск успешно сошелся за {i} итераций (norm: {grad_norm:.6f})"
+                )
                 break
 
             # Делаем шаг: x_{new} = x_{old} - learning_rate * grad
@@ -103,7 +122,9 @@ class GradientDescentOptimizer(BaseOptimizer):
 
         else:
             # Сработает, если цикл завершился по max_iter, а не по break
-            print(f"Внимание: Градиентный спуск остановлен по лимиту итераций ({max_iter})")
+            print(
+                f"Внимание: Градиентный спуск остановлен по лимиту итераций ({max_iter})"
+            )
 
         # Сохраняем финальную точку
         self._save_step(x, func(x))
@@ -114,7 +135,15 @@ class NelderMeadOptimizer(BaseOptimizer):
     """
     Метод Нелдера-Мида / деформируемого многогранника
     """
-    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], step: float = 0.5, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
+
+    def optimize(
+        self,
+        func: BaseFunction,
+        x0: Sequence[float | ConstructiveNumber],
+        step: float = 0.5,
+        max_iter: int = 1000,
+        tol: float = 1e-6,
+    ) -> Vector:
         self.clear_history()
         if max_iter <= 0:
             raise ValueError("max_iter должен быть положительным")
@@ -122,15 +151,15 @@ class NelderMeadOptimizer(BaseOptimizer):
         n = len(x0)
 
         # Классические гиперпараметры деформации симплекса
-        alpha = 1.0   # Коэффициент отражения
-        gamma = 2.0   # Коэффициент растяжения
-        rho = 0.5     # Коэффициент сжатия
-        sigma = 0.5   # Коэффициент глобального сжатия (shrink)
+        alpha = 1.0  # Коэффициент отражения
+        gamma = 2.0  # Коэффициент растяжения
+        rho = 0.5  # Коэффициент сжатия
+        sigma = 0.5  # Коэффициент глобального сжатия (shrink)
 
         # Инициализация стартового симплекса: создаем N + 1 вершин
         simplex = []
         simplex.append([xi for xi in x0])  # Первая вершина - стартовая точка
-        
+
         for i in range(n):
             point = [xi for xi in x0]
             # Сдвигаем одну из координат на величину step
@@ -148,19 +177,21 @@ class NelderMeadOptimizer(BaseOptimizer):
                 evaluated.append((f_center, f_val, pt))
 
             # Сортируем вершины по значению функции от лучшей к худшей
-            evaluated.sort(key = lambda item: item[0])
+            evaluated.sort(key=lambda item: item[0])
 
             # Распаковываем нужные нам точки
             best_f_center, best_f, best_pt = evaluated[0]
             good_f_center, _, _ = evaluated[-2]  # Предпоследняя - хорошая
-            worst_f_center, _, worst_pt = evaluated[-1] # Последняя - худшая
+            worst_f_center, _, worst_pt = evaluated[-1]  # Последняя - худшая
 
             # Сохраняем текущую лучшую точку в историю для графиков
             self._save_step(best_pt, best_f)
 
             # Критерий остановки - разница между худшей и лучшей точками
             if abs(worst_f_center - best_f_center) < tol:
-                print(f"Нелдер-Мид успешно сошелся за {it} итераций (diff: {abs(worst_f_center - best_f_center):.8f})")
+                print(
+                    f"Нелдер-Мид успешно сошелся за {it} итераций (diff: {abs(worst_f_center - best_f_center):.8f})"
+                )
                 break
 
             # Вычисление центра тяжести не учитываем худшую точку
@@ -172,7 +203,7 @@ class NelderMeadOptimizer(BaseOptimizer):
                 centroid.append(c_i / n)
 
             # ОПЕРАЦИИ ДЕФОРМАЦИИ
-            
+
             # Отражение
             xr = [centroid[i] + (centroid[i] - worst_pt[i]) * alpha for i in range(n)]
             fr_val = func(xr)
@@ -188,7 +219,7 @@ class NelderMeadOptimizer(BaseOptimizer):
                 xe = [centroid[i] + (xr[i] - centroid[i]) * gamma for i in range(n)]
                 fe_val = func(xe)
                 fe_center = to_real_value(fe_val)
-                
+
                 if fe_center < fr_center:
                     simplex = [pt for _, _, pt in evaluated[:-1]] + [xe]
                 else:
@@ -209,7 +240,9 @@ class NelderMeadOptimizer(BaseOptimizer):
             new_simplex = [best_pt]
             for i in range(1, len(simplex)):
                 pt = evaluated[i][2]
-                shrunk_pt = [best_pt[j] + (pt[j] - best_pt[j]) * sigma for j in range(n)]
+                shrunk_pt = [
+                    best_pt[j] + (pt[j] - best_pt[j]) * sigma for j in range(n)
+                ]
                 new_simplex.append(shrunk_pt)
             simplex = new_simplex
 
@@ -220,5 +253,5 @@ class NelderMeadOptimizer(BaseOptimizer):
         final_pt = evaluated[0][2]
         final_f = evaluated[0][1]
         self._save_step(final_pt, final_f)
-        
+
         return final_pt
