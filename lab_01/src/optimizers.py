@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Sequence, Tuple
 
 # Импортируем базовую функцию и тип вектора из нашего второго модуля
 from black_box import BaseFunction, Vector
@@ -48,7 +48,7 @@ class BaseOptimizer(ABC):
             self.history_f.append(float(f_val))
 
     @abstractmethod
-    def optimize(self, func: BaseFunction, x0: Vector, *args, **kwargs) -> Vector:
+    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], *args, **kwargs) -> Vector:
         """
         Основной метод оптимизации.
         :param func: Целевая функция, наследник BaseFunction
@@ -62,7 +62,7 @@ class GradientDescentOptimizer(BaseOptimizer):
     """
     Классический градиентный спуск
     """
-    def optimize(self, func: BaseFunction, x0: Vector, learning_rate: float = 0.01, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
+    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], learning_rate: float = 0.01, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
         """
         Запуск оптимизации.
         func: Целевая функция
@@ -112,7 +112,7 @@ class NelderMeadOptimizer(BaseOptimizer):
     """
     Метод Нелдера-Мида / деформируемого многогранника
     """
-    def optimize(self, func: BaseFunction, x0: Vector, step: float = 0.5, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
+    def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], step: float = 0.5, max_iter: int = 1000, tol: float = 1e-6) -> Vector:
         self.clear_history()
         if max_iter <= 0:
             raise ValueError("max_iter должен быть положительным")
