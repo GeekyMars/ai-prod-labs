@@ -25,6 +25,7 @@ class BaseOptimizer(ABC):
         # Хранилище истории для построения графиков
         self.history_x: List[Vector] = []
         self.history_f: List[float] = []
+        self.history_radius: List[float] = []
 
     def clear_history(self) -> None:
         """
@@ -32,20 +33,21 @@ class BaseOptimizer(ABC):
         """
         self.history_x.clear()
         self.history_f.clear()
+        self.history_radius.clear()
 
     def _save_step(self, x: Vector, f_val) -> None:
         """
-        Сохраняет текущую точку и значение функции
-        Вектор x копируется, чтобы избежать перезаписи ссылок в памяти
+        Сохраняет текущую точку, значение функции и радиус погрешности.
         """
-        # Копируем вектор. Если внутри ConstructiveNumber, они тоже сохранятся.
         self.history_x.append([xi for xi in x])
         
-        # Если f_val - конструктивное число, для графиков нам нужен его центр.
         if isinstance(f_val, ConstructiveNumber):
             self.history_f.append(f_val.get_center())
+            self.history_radius.append(f_val.get_radius())
         else:
             self.history_f.append(float(f_val))
+            self.history_radius.append(0.0)
+
 
     @abstractmethod
     def optimize(self, func: BaseFunction, x0: Sequence[float | ConstructiveNumber], *args, **kwargs) -> Vector:
