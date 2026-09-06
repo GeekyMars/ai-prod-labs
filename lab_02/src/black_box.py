@@ -1,15 +1,18 @@
 import math
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import List, Sequence, Union
 
 # Импортируем наш тип для аннотаций
 from .constructive_number import ConstructiveNumber
-from .optimizers import to_real_value
 
 # Создаем псевдоним типа для удобства
 # Наш вектор может состоять как из обычных чисел, так и из интервалов
-Vector = List[Union[float, "ConstructiveNumber"]]
+Vector = Sequence[Union[float, "ConstructiveNumber"]]
 
+def to_real_value(value: float | ConstructiveNumber) -> float:
+    if isinstance(value, ConstructiveNumber):
+        return value.get_center()
+    return float(value)
 
 class BaseFunction(ABC):
     """
@@ -243,6 +246,7 @@ class DesmosStepFunction(BaseFunction):
     def hessian(self, x: Vector) -> list[Vector]:
         self.hessian_calls += 1
         return [[0.0, 0.0], [0.0, 0.0]]
+
 
 class RastriginFunction(BaseFunction):
     """

@@ -36,7 +36,11 @@ class BaseOptimizer(ABC):
         self.history_f.clear()
         self.history_radius.clear()
 
-    def _save_step(self, x: Vector, f_val) -> None:
+    def _save_step(
+        self,
+        x: Sequence[float | ConstructiveNumber],
+        f_val: float | ConstructiveNumber,
+    ) -> None:
         """
         Сохраняет текущую точку, значение функции и радиус погрешности.
         """
@@ -154,7 +158,7 @@ class NelderMeadOptimizer(BaseOptimizer):
         alpha = 1.0  # Коэффициент отражения
         gamma = 2.0  # Коэффициент растяжения
         rho = 0.5  # Коэффициент сжатия
-        sigma = 0.5  # Коэффициент глобального сжатия (shrink)
+        sigma = 0.5  # Коэффициент глобального сжатия
 
         # Инициализация стартового симплекса: создаем N + 1 вершин
         simplex = []
