@@ -1,0 +1,19 @@
+[project]
+name = "lab_02"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "GeekyMars",email = "5fedoryg@gmail.com"}
+]
+package-mode = false
+requires-python = ">=3.14"
+dependencies = [
+    "numpy (>=2.5.2,<3.0.0)",
+    "matplotlib (>=3.11.1,<4.0.0)",
+    "jupyter (>=1.1.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
