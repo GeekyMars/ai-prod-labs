@@ -95,6 +95,7 @@ class PSOOptimizer(BaseOptimizer):
         w: float = 0.5,   # Коэффициент инерции - насколько частица сохраняет направление
         c1: float = 1.5,  # Когнитивный коэффициент - тяга к собственной лучшей точке
         c2: float = 1.5,  # Социальный коэффициент - тяга к лучшей точке всего роя
+        tol: float = 1e-6
     ) -> Vector:
         
         self.clear_history()
@@ -163,5 +164,9 @@ class PSOOptimizer(BaseOptimizer):
             # В историю записываем положение глобального лидера
             self._save_step(gbest_x, func(gbest_x))
 
-        print(f"Рой частиц завершил работу. Выполнено {max_iter} итераций.")
+            # Проверяем, не достигли ли мы минимума
+            if gbest_f_val < tol:
+                print(f"Рой частиц досрочно сошелся за {it} итераций (f(x): {gbest_f_val:.8f})")
+                break
+            
         return gbest_x
